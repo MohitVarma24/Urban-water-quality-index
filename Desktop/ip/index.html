@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Water Quality Monitoring Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="water_dashboard/static/css/styles.css">
+    
+    <!-- Leaflet CSS for Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-tint"></i>
+                    <h1>Water Quality Monitor</h1>
+                </div>
+                <nav class="nav">
+                    <ul>
+                        <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
+                        <li><a href="#sample-entry" class="nav-link">Sample Entry</a></li>
+                        <li><a href="#location" class="nav-link">Location</a></li>
+                        <li><a href="#parameters" class="nav-link">Parameters</a></li>
+                        <li><a href="#reports" class="nav-link">Reports</a></li>
+                    </ul>
+                </nav>
+                <div class="user-info">
+                    <span class="user-role">Admin</span>
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main">
+        <div class="container">
+            <!-- Dashboard Overview -->
+            <section id="dashboard" class="section active">
+                <div class="section-header">
+                    <h2>Urban Water Quality Monitoring System</h2>
+                    <p>Comprehensive real-time monitoring and analysis of municipal water quality parameters</p>
+                </div>
+
+                <!-- Quick Stats Overview -->
+                <div class="stats-overview">
+                    <h3>System Overview</h3>
+                    <div class="overview-grid">
+                        <div class="overview-item">
+                            <i class="fas fa-chart-line"></i>
+                            <div>
+                                <strong>Real-time Monitoring</strong>
+                                <p>Live water quality data collection and analysis</p>
+                            </div>
+                        </div>
+                        <div class="overview-item">
+                            <i class="fas fa-map-marked-alt"></i>
+                            <div>
+                                <strong>Location Tracking</strong>
+                                <p>Track water quality across multiple sampling sites</p>
+                            </div>
+                        </div>
+                        <div class="overview-item">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div>
+                                <strong>Alert System</strong>
+                                <p>Instant notifications for quality threshold breaches</p>
+                            </div>
+                        </div>
+                        <div class="overview-item">
+                            <i class="fas fa-file-chart-line"></i>
+                            <div>
+                                <strong>Analytics</strong>
+                                <p>Comprehensive reports and trend analysis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon blue">
+                            <i class="fas fa-flask"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>0</h3>
+                            <p>Total Samples</p>
+                            <small>Collected today</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon green">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>0</h3>
+                            <p>WQI Score</p>
+                            <small>Overall quality</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon yellow">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>0%</h3>
+                            <p>Compliance</p>
+                            <small>BIS standards met</small>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon red">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h3>0</h3>
+                            <p>Active Alerts</p>
+                            <small>Requires attention</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="map-container"
+                    style="margin-bottom: 2rem; background: var(--card-bg); padding: 1.5rem; border-radius: 12px; box-shadow: var(--shadow);">
+                    <div class="map-header">
+                        <h3>📍 Real-time Monitoring Map</h3>
+                        <div class="map-controls">
+                            <button class="btn btn-primary" onclick="initializeMap()">
+                                <i class="fas fa-map"></i> Load Map
+                            </button>
+                            <button class="btn btn-secondary" onclick="addSampleLocation()">
+                                <i class="fas fa-plus"></i> Add Sample
+                            </button>
+                            <button class="btn btn-info" onclick="clearMapMarkers()">
+                                <i class="fas fa-trash"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div id="dashboard-map"
+                        style="height: 500px; width: 100%; border-radius: 8px; margin-top: 1rem; z-index: 1; position: relative; background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);">
+                        <div style="position: absolute; top: 10px; left: 10px; background: white; padding: 8px 12px; border-radius: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); z-index: 10;">
+                            <strong style="color: #2c3e50;">Interactive Water Quality Map</strong>
+                            <div style="font-size: 0.9rem; color: #7f8c8d;">Click "Load Map" to display monitoring locations</div>
+                        </div>
+                    </div>
+                    <div class="map-legend">
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #28a745;"></span>
+                            <span>Excellent (WQI > 90)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #17a2b8;"></span>
+                            <span>Good (WQI 70-89)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #ffc107;"></span>
+                            <span>Fair (WQI 50-69)</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-color" style="background: #dc3545;"></span>
+                            <span>Poor (WQI < 50)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-content">
+                    <div class="chart-container">
+                        <h3>Water Quality Trends</h3>
+                        <div class="canvas-wrapper">
+                            <canvas id="qualityChart" width="800" height="300"></canvas>
+                        </div>
+                    </div>
+                    <div class="recent-samples">
+                        <h3>Recent Samples</h3>
+                        <div class="sample-list">
+                            <div class="no-samples">No samples recorded yet. Submit your first water quality sample!</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sample Entry Section -->
+            <section id="sample-entry" class="section">
+                <div class="section-header">
+                    <h2>Water Sample Collection</h2>
+                    <p>Record and analyze water quality samples from various locations</p>
+                </div>
+
+                <form method="POST" action="/" id="sampleForm" class="form-container">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="sampleId">Sample ID *</label>
+                            <input type="text" id="sampleId" name="sampleId" required
+                                placeholder="e.g., HYD001">
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="collectionDate">Collection Date *</label>
+                            <input type="datetime-local" id="collectionDate" name="collectionDate" required>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="siteName">Area Name *</label>
+                        <input type="text" id="siteName" name="siteName" required
+                            placeholder="e.g., Downtown Area, Industrial Zone, Residential Block">
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="temperature">Temperature (°C) *</label>
+                        <input type="number" id="temperature" name="temperature" min="0" max="50" step="0.1" required>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ph">pH Level *</label>
+                            <input type="number" id="ph" name="ph" min="0" max="14" step="0.01" required>
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="turbidity">Turbidity (NTU) *</label>
+                            <input type="number" id="turbidity" name="turbidity" min="0" max="100" step="0.1" required>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="tds">Total Dissolved Solids (mg/L)</label>
+                            <input type="number" id="tds" name="tds" min="0" max="5000" step="1">
+                            <span class="error-message"></span>
+                        </div>
+                        <div class="form-group">
+                            <label for="conductivity">Conductivity (μS/cm) *</label>
+                            <input type="number" id="conductivity" name="conductivity" min="0" max="5000" step="1" required>
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="appearance">Appearance</label>
+                        <select id="appearance" name="appearance">
+                            <option value="">Select</option>
+                            <option value="clear">Clear</option>
+                            <option value="slightly_cloudy">Slightly Cloudy</option>
+                            <option value="cloudy">Cloudy</option>
+                            <option value="turbid">Turbid</option>
+                        </select>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="odor">Odor</label>
+                        <select id="odor" name="odor">
+                            <option value="">Select</option>
+                            <option value="none">None</option>
+                            <option value="slight">Slight</option>
+                            <option value="moderate">Moderate</option>
+                            <option value="strong">Strong</option>
+                        </select>
+                        <span class="error-message"></span>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Sample
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset Form
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Location Section -->
+            <section id="location" class="section">
+                <div class="section-header">
+                    <h2>📍 Monitoring Locations</h2>
+                    <p>Manage and track water sampling locations across the monitoring network</p>
+                </div>
+
+                <!-- Water Safety Advisory -->
+                <div class="advisory-container" id="advisoryContainer">
+                    <div class="advisory-header">
+                        <i class="fas fa-shield-alt"></i>
+                        <h3>Water Safety Advisory</h3>
+                    </div>
+                    <div class="advisory-content" id="advisoryContent">
+                        <div class="loading-advisory">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <span>Analyzing water quality data...</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Parameters Section -->
+            <section id="parameters" class="section">
+                <div class="section-header">
+                    <h2>🧪 Water Quality Parameters</h2>
+                    <p>Advanced water quality testing and chemical analysis parameters</p>
+                </div>
+
+                <form method="POST" action="/parameters" id="parametersForm" class="form-container">
+                    <div class="parameter-section">
+                        <h3>Physical Parameters</h3>
+                        <div class="form-group">
+                            <label for="color">Color (HU) <span class="standard">(BIS: ≤5, WHO: ≤15)</span></label>
+                            <input type="number" id="color" name="color" min="0" max="100" step="1">
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="parameter-section">
+                        <h3>Chemical Parameters</h3>
+                        <div class="form-group">
+                            <label for="hardness">Hardness (mg/L) <span class="standard">(BIS: 200-600)</span></label>
+                            <input type="number" id="hardness" name="hardness" min="0" max="1000" step="1">
+                            <span class="error-message"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Save Parameters
+                        </button>
+                        <button type="reset" class="btn btn-secondary">
+                            <i class="fas fa-undo"></i> Reset Form
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reports" class="section">
+                <div class="section-header">
+                    <h2>📊 Quality Reports & Analytics</h2>
+                    <p>Generate comprehensive reports and analyze water quality trends</p>
+                </div>
+
+                <div class="report-filters">
+                    <div class="filter-group">
+                        <label for="reportPeriod">Time Period:</label>
+                        <select id="reportPeriod">
+                            <option value="daily">Daily</option>
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="quarterly">Quarterly</option>
+                            <option value="yearly">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="reportSite">Location:</label>
+                        <select id="reportSite">
+                            <option value="all">All Sites</option>
+                            <option value="site1">Site 1</option>
+                            <option value="site2">Site 2</option>
+                        </select>
+                    </div>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-file-download"></i> Generate Report
+                    </button>
+                </div>
+
+                <div class="report-preview">
+                    <h3>Report Preview</h3>
+                    <p>Select parameters and time period to generate water quality reports</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Water Quality Monitor</h4>
+                    <p>Advanced water quality monitoring and analysis system</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#dashboard">Dashboard</a></li>
+                        <li><a href="#sample-entry">Sample Entry</a></li>
+                        <li><a href="#reports">Reports</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Email: info@waterquality.com</p>
+                    <p>Phone: +91 1234567890</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Water Quality Monitor. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Leaflet JS for Maps -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="water_dashboard/static/js/script.js"></script>
+    
+    <!-- Map functionality script -->
+    <script>
+        // Map functionality
+        let map;
+        let markers = [];
+
+        // Initialize interactive map with Leaflet
+        function initializeMap() {
+            const mapContainer = document.getElementById('dashboard-map');
+            if (!mapContainer) return;
+            
+            // Initialize Leaflet map
+            map = L.map('dashboard-map').setView([17.4, 78.5], 11);
+            
+            // Add tile layer
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 18
+            }).addTo(map);
+            
+            // Load sample locations and display them
+            loadMapLocations();
+            
+            showMessage('Map loaded successfully!', 'success');
+        }
+
+        // Load and display monitoring locations on map
+        function loadMapLocations() {
+            const locations = JSON.parse(localStorage.getItem('waterLocations') || '[]');
+            const samples = JSON.parse(localStorage.getItem('waterSamples') || '[]');
+            
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            if (locations.length === 0) {
+                // Show sample locations if no real data
+                showSampleMapData();
+                return;
+            }
+            
+            // Add location markers
+            locations.forEach((location, index) => {
+                const latestSample = samples.filter(s => s.siteName === location.siteName).pop();
+                const wqi = calculateWQIFromSample(latestSample);
+                const status = getWQIStatus(wqi);
+                const color = getWQIColor(status);
+                
+                const marker = L.marker([location.latitude, location.longitude])
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📍 ${location.siteName}</h4>
+                            <div style="margin-bottom: 5px;"><strong>Water Quality Index:</strong> ${wqi.toFixed(1)} (${status})</div>
+                            ${latestSample ? `
+                                <div style="margin-bottom: 3px;"><strong>pH:</strong> ${latestSample.ph || 'N/A'}</div>
+                                <div style="margin-bottom: 3px;"><strong>Temperature:</strong> ${latestSample.temperature || 'N/A'}°C</div>
+                                <div style="margin-bottom: 3px;"><strong>Turbidity:</strong> ${latestSample.turbidity || 'N/A'} NTU</div>
+                                <div style="margin-bottom: 3px;"><strong>Conductivity:</strong> ${latestSample.conductivity || 'N/A'} μS/cm</div>
+                                <div style="margin-bottom: 3px;"><strong>Last Sample:</strong> ${formatDate(latestSample.timestamp)}</div>
+                            ` : '<div style="color: #7f8c8d;">No sample data available</div>'}
+                        </div>
+                    `);
+                
+                // Style marker based on WQI
+                const markerElement = marker.getElement();
+                markerElement.style.backgroundColor = color;
+                markerElement.style.borderRadius = '50%';
+                markerElement.style.width = '30px';
+                markerElement.style.height = '30px';
+                markerElement.style.display = 'flex';
+                markerElement.style.alignItems = 'center';
+                markerElement.style.justifyContent = 'center';
+                markerElement.style.color = 'white';
+                markerElement.style.fontWeight = 'bold';
+                markerElement.style.fontSize = '12px';
+                markerElement.innerHTML = wqi.toFixed(0);
+                
+                markers.push(marker);
+            });
+            
+            // Fit map to show all markers
+            if (markers.length > 0) {
+                const group = L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Show sample map data for demonstration
+        function showSampleMapData() {
+            const sampleLocations = [
+                { name: 'Boduppal', lat: 17.3953, lng: 78.5432, wqi: 85 },
+                { name: 'Habsiguda', lat: 17.4062, lng: 78.5407, wqi: 92 },
+                { name: 'Nacharam', lat: 17.4180, lng: 78.5584, wqi: 78 },
+                { name: 'Malkajgiri', lat: 17.4908, lng: 78.5513, wqi: 88 },
+                { name: 'Secunderabad', lat: 17.4399, lng: 78.4983, wqi: 95 }
+            ];
+            
+            // Clear existing markers
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            
+            // Add sample location markers
+            sampleLocations.forEach((location, index) => {
+                const status = getWQIStatus(location.wqi);
+                const color = getWQIColor(status);
+                
+                const marker = L.marker([location.lat, location.lng])
+                    .addTo(map)
+                    .bindPopup(`
+                        <div style="min-width: 200px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📍 ${location.name}</h4>
+                            <div style="margin-bottom: 5px;"><strong>Water Quality Index:</strong> ${location.wqi.toFixed(1)} (${status})</div>
+                            <div style="margin-bottom: 3px;"><strong>Sample Location:</strong> ${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}</div>
+                            <div style="margin-bottom: 3px;"><strong>Status:</strong> <span style="color: ${color};">${status.toUpperCase()}</span></div>
+                        </div>
+                    `);
+                
+                // Style marker based on WQI
+                const markerElement = marker.getElement();
+                markerElement.style.backgroundColor = color;
+                markerElement.style.borderRadius = '50%';
+                markerElement.style.width = '35px';
+                markerElement.style.height = '35px';
+                markerElement.style.display = 'flex';
+                markerElement.style.alignItems = 'center';
+                markerElement.style.justifyContent = 'center';
+                markerElement.style.color = 'white';
+                markerElement.style.fontWeight = 'bold';
+                markerElement.style.fontSize = '14px';
+                markerElement.innerHTML = location.wqi.toFixed(0);
+                
+                markers.push(marker);
+            });
+            
+            // Fit map to show all markers
+            if (markers.length > 0) {
+                const group = L.featureGroup(markers);
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+        }
+
+        // Add new sample location
+        function addSampleLocation() {
+            const name = prompt('Enter location name:');
+            if (!name) return;
+            
+            const lat = parseFloat(prompt('Enter latitude:'));
+            const lng = parseFloat(prompt('Enter longitude:'));
+            
+            if (isNaN(lat) || isNaN(lng)) {
+                showMessage('Invalid coordinates', 'error');
+                return;
+            }
+            
+            const locations = JSON.parse(localStorage.getItem('waterLocations') || '[]');
+            const newLocation = {
+                siteName: name,
+                latitude: lat,
+                longitude: lng,
+                areaType: 'sample',
+                waterSource: 'municipal'
+            };
+            
+            locations.push(newLocation);
+            localStorage.setItem('waterLocations', JSON.stringify(locations));
+            
+            // Add marker to map
+            const marker = L.marker([lat, lng])
+                .addTo(map)
+                .bindPopup(`
+                    <div style="min-width: 200px;">
+                        <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📍 ${name}</h4>
+                        <div style="margin-bottom: 5px;"><strong>Coordinates:</strong> ${lat.toFixed(4)}, ${lng.toFixed(4)}</div>
+                        <div style="margin-bottom: 5px;"><strong>Status:</strong> New Location</div>
+                    </div>
+                `);
+            
+            // Style marker
+            const markerElement = marker.getElement();
+            markerElement.style.backgroundColor = '#17a2b8';
+            markerElement.style.borderRadius = '50%';
+            markerElement.style.width = '35px';
+            markerElement.style.height = '35px';
+            markerElement.style.display = 'flex';
+            markerElement.style.alignItems = 'center';
+            markerElement.style.justifyContent = 'center';
+            markerElement.style.color = 'white';
+            markerElement.style.fontWeight = 'bold';
+            markerElement.style.fontSize = '14px';
+            markerElement.innerHTML = 'NEW';
+            
+            markers.push(marker);
+            
+            showMessage(`Location "${name}" added successfully!`, 'success');
+        }
+
+        // Clear all map markers
+        function clearMapMarkers() {
+            markers.forEach(marker => map.removeLayer(marker));
+            markers = [];
+            localStorage.removeItem('waterLocations');
+            showMessage('All markers cleared', 'info');
+        }
+
+        // Helper functions
+        function calculateWQIFromSample(sample) {
+            if (!sample) return 75; // Default WQI
+            
+            const ph = parseFloat(sample.ph) || 7;
+            const turbidity = parseFloat(sample.turbidity) || 2;
+            const tds = parseFloat(sample.tds) || 300;
+            const conductivity = parseFloat(sample.conductivity) || 500;
+            const temperature = parseFloat(sample.temperature) || 25;
+            
+            let score = 0;
+            
+            // pH score (25%)
+            if (ph >= 6.5 && ph <= 8.5) score += 25;
+            else if (ph >= 6 && ph <= 9) score += 15;
+            
+            // Turbidity score (20%)
+            if (turbidity <= 1) score += 20;
+            else if (turbidity <= 5) score += 15;
+            else if (turbidity <= 10) score += 10;
+            
+            // TDS score (20%)
+            if (tds <= 300) score += 20;
+            else if (tds <= 600) score += 15;
+            else if (tds <= 1000) score += 10;
+            
+            // Conductivity score (15%)
+            if (conductivity <= 500) score += 15;
+            else if (conductivity <= 1000) score += 10;
+            else if (conductivity <= 2000) score += 5;
+            
+            // Temperature score (20%)
+            if (temperature >= 15 && temperature <= 25) score += 20;
+            else if (temperature >= 10 && temperature <= 30) score += 15;
+            else if (temperature >= 5 && temperature <= 35) score += 10;
+            
+            return Math.max(0, Math.min(100, score));
+        }
+
+        function getWQIStatus(wqi) {
+            if (wqi >= 90) return 'Excellent';
+            if (wqi >= 70) return 'Good';
+            if (wqi >= 50) return 'Fair';
+            return 'Poor';
+        }
+
+        function getWQIColor(status) {
+            const colors = {
+                'Excellent': '#28a745',
+                'Good': '#17a2b8',
+                'Fair': '#ffc107',
+                'Poor': '#dc3545'
+            };
+            return colors[status] || '#6c757d';
+        }
+
+        function formatDate(timestamp) {
+            return new Date(timestamp).toLocaleString();
+        }
+
+        function showMessage(message, type) {
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // Form submission and data handling
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current datetime for collection date
+            setDefaultDateTime();
+            
+            // Initialize form validation
+            initializeFormValidations();
+            
+            // Handle sample form submission
+            const sampleForm = document.getElementById('sampleForm');
+            if (sampleForm) {
+                sampleForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveSampleData(this);
+                });
+            }
+            
+            // Handle parameters form submission
+            const parametersForm = document.getElementById('parametersForm');
+            if (parametersForm) {
+                parametersForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    saveParametersData(this);
+                });
+            }
+            
+            // Load existing data
+            loadDashboardData();
+        });
+        
+        // Set default datetime
+        function setDefaultDateTime() {
+            const now = new Date();
+            const datetime = now.toISOString().slice(0, 16);
+            const collectionDateInput = document.getElementById('collectionDate');
+            if (collectionDateInput) {
+                collectionDateInput.value = datetime;
+            }
+        }
+        
+        // Initialize form validations
+        function initializeFormValidations() {
+            // Real-time pH validation with alerts
+            const phInput = document.getElementById('ph');
+            if (phInput) {
+                phInput.addEventListener('input', function() {
+                    validatePhInput(this);
+                });
+            }
+            
+            // Add blur validation to all required inputs
+            const requiredInputs = document.querySelectorAll('input[required]');
+            requiredInputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    validateField(this);
+                });
+                input.addEventListener('input', function() {
+                    clearError(this);
+                });
+            });
+        }
+        
+        // Validate pH input with real-time alerts
+        function validatePhInput(input) {
+            const phValue = parseFloat(input.value);
+            
+            if (isNaN(phValue)) return;
+            
+            // Clear previous alerts
+            clearPhInputAlerts();
+            
+            // Check for dangerous pH levels
+            if (phValue < 6.5 || phValue > 8.5) {
+                const alertType = phValue < 6.5 ? 'low' : 'high';
+                const alertData = {
+                    low: {
+                        message: "DANGEROUS: pH is too acidic (below 6.5)",
+                        color: "#dc3545",
+                        icon: "times-circle",
+                        recommendation: "Add alkaline treatment immediately"
+                    },
+                    high: {
+                        message: "DANGEROUS: pH is too alkaline (above 8.5)",
+                        color: "#dc3545",
+                        icon: "times-circle",
+                        recommendation: "Add acidic treatment immediately"
+                    }
+                };
+                
+                const alert = alertData[alertType];
+                showPhInputAlert(input, alert);
+                
+                // Send browser notification
+                if (Notification.permission === 'granted') {
+                    new Notification(`🚨 pH Level Alert`, {
+                        body: alert.message,
+                        icon: '/favicon.ico',
+                        tag: `ph-alert-${Date.now()}`
+                    });
+                }
+            }
+        }
+        
+        // Show pH input alert
+        function showPhInputAlert(input, alert) {
+            const alertElement = document.createElement('div');
+            alertElement.className = 'ph-input-alert';
+            alertElement.innerHTML = `
+                <div class="ph-alert-content">
+                    <i class="fas fa-${alert.icon}" style="color: ${alert.color};"></i>
+                    <span class="ph-alert-message">${alert.message}</span>
+                    <div class="ph-alert-recommendation">
+                        <strong>Recommendation:</strong> ${alert.recommendation}
+                    </div>
+                </div>
+            `;
+            
+            // Position alert near the input
+            const inputRect = input.getBoundingClientRect();
+            alertElement.style.position = 'fixed';
+            alertElement.style.top = (inputRect.bottom + 5) + 'px';
+            alertElement.style.left = inputRect.left + 'px';
+            alertElement.style.zIndex = '1000';
+            alertElement.style.backgroundColor = '#fff';
+            alertElement.style.border = `2px solid ${alert.color}`;
+            alertElement.style.borderRadius = '8px';
+            alertElement.style.padding = '12px';
+            alertElement.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+            alertElement.style.maxWidth = '300px';
+            
+            document.body.appendChild(alertElement);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (alertElement.parentNode) {
+                    alertElement.remove();
+                }
+            }, 5000);
+        }
+        
+        // Clear pH input alerts
+        function clearPhInputAlerts() {
+            const existingAlerts = document.querySelectorAll('.ph-input-alert');
+            existingAlerts.forEach(alert => alert.remove());
+        }
+        
+        // Validate field
+        function validateField(field) {
+            const value = field.value.trim();
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            
+            // Reset error state
+            field.classList.remove('error');
+            if (errorMsg) errorMsg.textContent = '';
+            
+            // Check if required and empty
+            if (field.hasAttribute('required') && !value) {
+                showError(field, 'This field is required');
+                return false;
+            }
+            
+            // Number field validation
+            if (field.type === 'number' && value) {
+                const numValue = parseFloat(value);
+                const min = parseFloat(field.getAttribute('min'));
+                const max = parseFloat(field.getAttribute('max'));
+                
+                if (isNaN(numValue)) {
+                    showError(field, 'Please enter a valid number');
+                    return false;
+                }
+                
+                if (min !== undefined && numValue < min) {
+                    showError(field, `Value must be at least ${min}`);
+                    return false;
+                }
+                
+                if (max !== undefined && numValue > max) {
+                    showError(field, `Value must be no more than ${max}`);
+                    return false;
+                }
+            }
+            
+            return true;
+        }
+        
+        // Show error message
+        function showError(field, message) {
+            field.classList.add('error');
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.textContent = message;
+                errorMsg.style.color = '#dc3545';
+                errorMsg.style.fontSize = '0.875rem';
+                errorMsg.style.marginTop = '0.25rem';
+            }
+        }
+        
+        // Clear error message
+        function clearError(field) {
+            field.classList.remove('error');
+            const errorMsg = field.parentElement.querySelector('.error-message');
+            if (errorMsg) {
+                errorMsg.textContent = '';
+            }
+        }
+        
+        // Save sample data
+        function saveSampleData(form) {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Add timestamp
+            data.timestamp = new Date().toISOString();
+            
+            // Store in localStorage
+            let samples = JSON.parse(localStorage.getItem('waterSamples') || '[]');
+            samples.push(data);
+            localStorage.setItem('waterSamples', JSON.stringify(samples));
+            
+            console.log('Sample data saved:', data);
+            
+            // Update dashboard
+            updateDashboardStats();
+            updateRecentSamples();
+            updateAdvisory();
+            
+            // Show success message
+            showMessage('Sample data saved successfully!', 'success');
+            
+            // Reset form
+            form.reset();
+            setDefaultDateTime();
+        }
+        
+        // Save parameters data
+        function saveParametersData(form) {
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData.entries());
+            
+            // Add timestamp
+            data.timestamp = new Date().toISOString();
+            
+            // Store in localStorage
+            let parameters = JSON.parse(localStorage.getItem('waterParameters') || '[]');
+            parameters.push(data);
+            localStorage.setItem('waterParameters', JSON.stringify(parameters));
+            
+            console.log('Parameters data saved:', data);
+            
+            // Show success message
+            showMessage('Parameters data saved successfully!', 'success');
+            
+            // Reset form
+            form.reset();
+        }
+        
+        // Load dashboard data
+        function loadDashboardData() {
+            updateDashboardStats();
+            updateRecentSamples();
+            updateAdvisory();
+        }
+        
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            const samples = JSON.parse(localStorage.getItem('waterSamples') || '[]');
+            
+            // Update total samples
+            const totalSamplesElement = document.querySelector('.stat-card:nth-child(1) h3');
+            if (totalSamplesElement) {
+                totalSamplesElement.textContent = samples.length;
+            }
+            
+            // Calculate and update WQI
+            const wqi = calculateWaterQualityIndex(samples);
+            const wqiElement = document.querySelector('.stat-card:nth-child(2) h3');
+            if (wqiElement) {
+                wqiElement.textContent = wqi.toFixed(0);
+            }
+            
+            // Calculate compliance rate
+            const complianceRate = calculateComplianceRate(samples);
+            const complianceElement = document.querySelector('.stat-card:nth-child(3) h3');
+            if (complianceElement) {
+                complianceElement.textContent = complianceRate + '%';
+            }
+            
+            // Calculate active alerts
+            const alertCount = calculateActiveAlerts(samples);
+            const alertsElement = document.querySelector('.stat-card:nth-child(4) h3');
+            if (alertsElement) {
+                alertsElement.textContent = alertCount;
+            }
+        }
+        
+        // Update recent samples display
+        function updateRecentSamples() {
+            const samples = JSON.parse(localStorage.getItem('waterSamples') || '[]');
+            const sampleList = document.querySelector('.sample-list');
+            
+            if (!sampleList) return;
+            
+            // Clear existing samples
+            sampleList.innerHTML = '';
+            
+            // If no samples, show message
+            if (samples.length === 0) {
+                sampleList.innerHTML = '<div class="no-samples">No samples recorded yet. Submit your first water quality sample!</div>';
+                return;
+            }
+            
+            // Sort samples by date (most recent first)
+            const sortedSamples = samples.sort((a, b) => {
+                const dateA = new Date(a.timestamp || a.collectionDate);
+                const dateB = new Date(b.timestamp || b.collectionDate);
+                return dateB - dateA;
+            });
+            
+            // Display last 5 samples
+            const recentSamples = sortedSamples.slice(0, 5);
+            
+            recentSamples.forEach(sample => {
+                const sampleItem = createSampleItem(sample);
+                sampleList.appendChild(sampleItem);
+            });
+        }
+        
+        // Create sample item element
+        function createSampleItem(sample) {
+            const sampleItem = document.createElement('div');
+            sampleItem.className = 'sample-item';
+            sampleItem.style.cssText = `
+                background: white;
+                padding: 1rem;
+                border-radius: 8px;
+                margin-bottom: 0.5rem;
+                border-left: 4px solid #17a2b8;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            `;
+            
+            const locationName = sample.siteName || 'Unknown Location';
+            const sampleDate = new Date(sample.timestamp || sample.collectionDate);
+            const formattedDate = sampleDate.toLocaleDateString() + ' ' + sampleDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            sampleItem.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h4 style="margin: 0 0 0.5rem 0; color: #2c3e50;">${locationName}</h4>
+                        <p style="margin: 0.25rem 0; font-size: 0.875rem; color: #6c757d;">pH: ${sample.ph || 'N/A'} | Temp: ${sample.temperature || 'N/A'}°C</p>
+                        <p style="margin: 0.25rem 0; font-size: 0.875rem; color: #6c757d;">Turbidity: ${sample.turbidity || 'N/A'} NTU | Conductivity: ${sample.conductivity || 'N/A'} μS/cm</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 0.75rem; color: #6c757d;">${formattedDate}</div>
+                        <div style="margin-top: 0.25rem;">
+                            <span style="background: #28a745; color: white; padding: 0.25rem 0.5rem; border-radius: 12px; font-size: 0.75rem;">Good</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return sampleItem;
+        }
+        
+        // Update water safety advisory
+        function updateAdvisory() {
+            const samples = JSON.parse(localStorage.getItem('waterSamples') || '[]');
+            const advisoryContent = document.getElementById('advisoryContent');
+            
+            if (!advisoryContent) return;
+            
+            // Get most recent sample for advisory
+            if (samples.length === 0) {
+                advisoryContent.innerHTML = `
+                    <div style="text-align: center; padding: 2rem; color: #6c757d;">
+                        <i class="fas fa-info-circle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                        <p>No water quality data available yet.</p>
+                        <p style="font-size: 0.875rem;">Submit your first sample to see water safety advisory.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const latestSample = samples[samples.length - 1];
+            const advisory = classifyWaterSafety(latestSample);
+            
+            advisoryContent.innerHTML = `
+                <div style="padding: 1rem;">
+                    <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                        <div style="width: 12px; height: 12px; border-radius: 50%; background: #28a745; margin-right: 0.5rem;"></div>
+                        <strong style="color: #28a745;">Water Quality: ${advisory.highestRisk.toUpperCase()}</strong>
+                    </div>
+                    <p style="margin: 0.5rem 0; font-size: 0.875rem;">Based on latest sample from ${latestSample.siteName || 'Unknown Location'}</p>
+                    <div style="margin-top: 1rem; padding: 0.75rem; background: #f8f9fa; border-radius: 6px;">
+                        <p style="margin: 0; font-size: 0.875rem; color: #495057;">
+                            <strong>Recommendation:</strong> Water quality is acceptable for consumption. Continue regular monitoring.
+                        </p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Classify water safety
+        function classifyWaterSafety(sample) {
+            const ph = parseFloat(sample.ph) || 7;
+            const turbidity = parseFloat(sample.turbidity) || 2;
+            const conductivity = parseFloat(sample.conductivity) || 500;
+            
+            let riskLevel = 'excellent';
+            
+            if (ph < 6.5 || ph > 8.5 || turbidity > 5 || conductivity > 2000) {
+                riskLevel = 'poor';
+            } else if (ph < 6.8 || ph > 8.2 || turbidity > 2 || conductivity > 1000) {
+                riskLevel = 'fair';
+            } else if (ph < 7 || ph > 8 || turbidity > 1 || conductivity > 750) {
+                riskLevel = 'good';
+            }
+            
+            return {
+                highestRisk: riskLevel,
+                overallStatus: riskLevel,
+                advisories: []
+            };
+        }
+        
+        // Calculate Water Quality Index
+        function calculateWaterQualityIndex(samples) {
+            if (samples.length === 0) return 75;
+            
+            let totalScore = 0;
+            let validSamples = 0;
+            
+            samples.forEach(sample => {
+                const ph = parseFloat(sample.ph) || 7;
+                const turbidity = parseFloat(sample.turbidity) || 2;
+                const tds = parseFloat(sample.tds) || 300;
+                const conductivity = parseFloat(sample.conductivity) || 500;
+                const temperature = parseFloat(sample.temperature) || 25;
+                
+                let sampleScore = 0;
+                
+                // pH score (25%)
+                if (ph >= 6.5 && ph <= 8.5) sampleScore += 25;
+                else if (ph >= 6 && ph <= 9) sampleScore += 15;
+                
+                // Turbidity score (20%)
+                if (turbidity <= 1) sampleScore += 20;
+                else if (turbidity <= 5) sampleScore += 15;
+                else if (turbidity <= 10) sampleScore += 10;
+                
+                // TDS score (20%)
+                if (tds <= 300) sampleScore += 20;
+                else if (tds <= 600) sampleScore += 15;
+                else if (tds <= 1000) sampleScore += 10;
+                
+                // Conductivity score (15%)
+                if (conductivity <= 500) sampleScore += 15;
+                else if (conductivity <= 1000) sampleScore += 10;
+                else if (conductivity <= 2000) sampleScore += 5;
+                
+                // Temperature score (20%)
+                if (temperature >= 15 && temperature <= 25) sampleScore += 20;
+                else if (temperature >= 10 && temperature <= 30) sampleScore += 15;
+                else if (temperature >= 5 && temperature <= 35) sampleScore += 10;
+                
+                if (sampleScore >= 30) {
+                    totalScore += sampleScore;
+                    validSamples++;
+                }
+            });
+            
+            if (validSamples === 0) return 75;
+            return Math.max(0, Math.min(100, totalScore / validSamples));
+        }
+        
+        // Calculate compliance rate
+        function calculateComplianceRate(samples) {
+            if (samples.length === 0) return 100;
+            
+            let compliantCount = 0;
+            let totalCount = 0;
+            
+            samples.forEach(sample => {
+                const ph = parseFloat(sample.ph) || 7;
+                const turbidity = parseFloat(sample.turbidity) || 2;
+                const tds = parseFloat(sample.tds) || 300;
+                const conductivity = parseFloat(sample.conductivity) || 500;
+                
+                // Check BIS/WHO compliance
+                const checks = [
+                    ph >= 6.5 && ph <= 8.5,
+                    turbidity <= 5,
+                    tds <= 1000,
+                    conductivity <= 3000
+                ];
+                
+                checks.forEach(compliant => {
+                    if (compliant !== undefined) {
+                        if (compliant) compliantCount++;
+                        totalCount++;
+                    }
+                });
+            });
+            
+            return totalCount > 0 ? Math.round((compliantCount / totalCount) * 100) : 100;
+        }
+        
+        // Calculate active alerts
+        function calculateActiveAlerts(samples) {
+            let alertCount = 0;
+            
+            samples.forEach(sample => {
+                const ph = parseFloat(sample.ph) || 7;
+                const turbidity = parseFloat(sample.turbidity) || 2;
+                const tds = parseFloat(sample.tds) || 300;
+                const temperature = parseFloat(sample.temperature) || 25;
+                
+                // Check for critical conditions
+                if (ph < 6.5 || ph > 8.5 || 
+                    turbidity > 5 || 
+                    tds > 1000 || 
+                    temperature > 35) {
+                    alertCount++;
+                }
+            });
+            
+            return alertCount;
+        }
+        
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission().then(permission => {
+                console.log('Notification permission:', permission);
+            });
+        }
+    </script>
+</body>
+</html>
